@@ -27,3 +27,7 @@ Integrations/raycast/raycast-env.d.ts
 # IDEs
 .idea/
 .vscode/
+
+# Windows build binaries (distributed via GitHub Releases)
+windows/*.exe
+windows/cmd/installer/payload/*.gz

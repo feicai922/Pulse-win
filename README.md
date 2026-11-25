@@ -2,191 +2,92 @@
   <img src="AppIcon/pulse-icon-1024.png" width="112" alt="Pulse">
 </p>
 
-<h1 align="center">Pulse</h1>
+<h1 align="center">Pulse for Windows</h1>
 
 <p align="center">
-  <b>Know how much Claude Code, Codex and Cursor you have left — without opening a single usage page.</b><br>
-  A free, open-source macOS monitor that sits on the edge of your screen and shows every AI coding limit at a glance.
+  <b>Know how much Claude Code, Codex, Cursor and Antigravity quota you have left — without opening a single usage page.</b><br>
+  A free, open-source native Windows monitor written in Go + Win32 + GDI+ that docks cleanly along your screen edge and system tray.
 </p>
 
 <p align="center">
-  <a href="https://github.com/qunqin24/Pulse/releases/latest"><img src="https://img.shields.io/badge/Download-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download Pulse for macOS"></a>
+  <a href="https://github.com/feicai922/Pulse-win/releases/latest"><img src="https://img.shields.io/badge/Download-PulseSetup.exe-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Pulse for Windows"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/qunqin24/Pulse/releases/latest"><img src="https://img.shields.io/github/v/release/qunqin24/Pulse?color=black" alt="Latest release"></a>
-  <a href="https://github.com/qunqin24/Pulse/releases"><img src="https://img.shields.io/github/downloads/qunqin24/Pulse/total?color=black" alt="Downloads"></a>
-  <a href="https://github.com/qunqin24/Pulse/stargazers"><img src="https://img.shields.io/github/stars/qunqin24/Pulse?color=black" alt="GitHub stars"></a>
+  <a href="https://github.com/feicai922/Pulse-win/releases/latest"><img src="https://img.shields.io/github/v/release/feicai922/Pulse-win?color=black" alt="Latest release"></a>
+  <a href="https://github.com/feicai922/Pulse-win/releases"><img src="https://img.shields.io/github/downloads/feicai922/Pulse-win/total?color=black" alt="Downloads"></a>
+  <a href="https://github.com/feicai922/Pulse-win/stargazers"><img src="https://img.shields.io/github/stars/feicai922/Pulse-win?color=black" alt="GitHub stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 license"></a>
 </p>
 
 <p align="center">
-  <sub><b>macOS 14 Sonoma or newer</b> · Apple Silicon & Intel · <b>English</b> · <a href="README.zh-CN.md"><b>简体中文</b></a> · <a href="README.zh-Hant.md"><b>繁體中文</b></a> · <a href="README.ja.md"><b>日本語</b></a> · <a href="README.ko.md"><b>한국어</b></a> · <a href="README.ru.md"><b>Русский</b></a></sub>
+  <sub><b>Windows 10 / 11 (x64)</b> · Pure Go + Win32 + GDI+ (No Electron) · <b>English</b> · <a href="README.zh-CN.md"><b>简体中文</b></a> · <a href="windows/README.md"><b>Windows Dev Guide</b></a></sub>
 </p>
 
-<p align="center">
-  <img src="Docs/images/demo.gif" height="360" alt="Pulse floating rail docked against the screen edge">
-  &nbsp;&nbsp;
-  <img src="Docs/images/panel.png" height="360" alt="Hovering a ring opens a card with every limit and its reset">
-  &nbsp;&nbsp;
-  <img src="Docs/images/glass.webp" height="360" alt="The same panel on Liquid Glass">
-</p>
+---
 
-- **Seventy-eight services at a glance** — Claude Code, Codex, Cursor, GitHub Copilot, Antigravity, Kiro, Grok, DeepSeek, Kimi Code and many more, each as its own ring.
-- **No Pulse account, no Pulse server** — it uses the logins you already have, and nothing is sent back.
-- **Real numbers only** — every usage percentage is the one the service itself reported. The few estimates are marked as such, and where a service reports nothing, Pulse says so instead of guessing.
-- **Native and quiet** — Swift and SwiftUI, Liquid Glass on macOS 26. Dock it left, right, along the top or along the bottom beside the Dock, let it fold to a sliver when idle, or keep it in the menu bar.
-
-**Recently added:** usage in the menu bar with a dashboard for each account and starting usage windows after a reset. [What's new](https://github.com/qunqin24/Pulse/releases/latest).
-
-<p align="center">
-  <sub>If Pulse has saved you from a surprise rate limit, a ⭐ helps other people find it.</sub>
-</p>
+- **Native & ultra-lightweight** — Built with pure Go (`CGO_ENABLED=0`), Win32 APIs, and GDI+ instead of Electron or WebView runtimes (~10–18 MB RAM, crisp Per-Monitor V2 DPI scaling).
+- **22 AI coding providers** — Claude Code, Codex, Cursor, GitHub Copilot, Antigravity, Gemini CLI, Grok CLI, DeepSeek, Kimi Code, z.ai, Zhipu GLM Coding Plan, MiniMax, OpenCode Go, Kiro, and more.
+- **No Pulse account, no telemetry** — Reads local credentials or connects directly to each provider using your own logins and API keys, encrypted locally with **Windows DPAPI**.
+- **True Pulse visual design** — Edge-docked rail with concave berth flares, idle sliver auto-collapse, curved-tail detail cards, system tray live ring + dashboard popup, and a dark native Settings window.
 
 ---
 
 ## Installation
 
-1. Download the latest **`Pulse-x.y.z.dmg`** from [Releases](https://github.com/qunqin24/Pulse/releases/latest).
-2. Open the disk image and drag **Pulse** into your `Applications` folder.
-3. On first launch, choose the services to monitor. All start unchecked; Pulse reads their credentials and checks usage only after you click **Done**. Closing the chooser leaves monitoring off; you can also enable a service in Settings. Upgrades keep your choices and ask once about newly supported services detected on your Mac.
-4. Pulse lives in the menu bar. If your menu bar is crowded, right-click the floating rail — or the collapsed sliver — and choose **Settings…**; you can also assign a global shortcut for it under **Settings › General › Shortcuts**.
+### Option 1: Windows Installer (Recommended)
+1. Download **`PulseSetup.exe`** from [Releases](https://github.com/feicai922/Pulse-win/releases/latest).
+2. Double-click `PulseSetup.exe`, choose your install folder (defaults to `%LOCALAPPDATA%\Programs\Pulse`), and pick optional Desktop/Start Menu shortcuts and launch-at-startup.
+3. Uninstall cleanly anytime from **Windows Settings → Apps → Installed apps** (or `Pulse.exe --uninstall`).
 
-> [!NOTE]
-> **macOS Gatekeeper First Launch**:<br>
-> Pulse is an open-source project without an Apple Developer certificate. On first launch, macOS may block the app:
-> - **Option 1 (GUI)**: Launch Pulse, dismiss the alert, open **System Settings → Privacy & Security**, and click **Open Anyway**.
-> - **Option 2 (Terminal)**:
->   ```bash
->   xattr -cr /Applications/Pulse.app
->   ```
->   *Updates are offered in-app through Sparkle. macOS may request browser keychain access again after an update.*
+### Option 2: Portable Executable
+Download **`Pulse.exe`** from [Releases](https://github.com/feicai922/Pulse-win/releases/latest) and run it directly — no installation required.
 
 ---
 
 ## Key Features
 
-### Rings at a glance
-- **Colours that follow usage** — green through amber to red, or a colour of your own for each account.
-- **Used or left** — `75% used` or `25% left`, with an optional clock arc for how much of the window has passed.
-- **Live activity** — a turning dot while an agent is working, and an optional robot that reacts to each account, drawn as one of 23 figures from Dominik Scholz's Open Bot Avatar.
+### Floating Edge Panel
+- **Dock anywhere** — Snap smoothly to the **right, left, top, or bottom** screen edge, or switch to free vertical/horizontal floating placement across multi-monitor setups (with optional **Follow Active Display**).
+- **Auto-collapse sliver** — Folds into a thin indicator strip at the screen edge when idle (turns red when exhausted) and expands immediately on hover.
+- **Hover detail cards** — Shows every usage window, continuous or segmented bars, used/remaining percentage, reset countdown, burn-rate exhaustion forecast, and account balance.
+- **Surfaces & privacy** — Obsidian, Light, and Translucent themes plus **Hide from Screen Capture** (`WDA_EXCLUDEFROMCAPTURE`).
 
-### Details when you point at a ring
-- **Every limit and its reset** on one card, in continuous or segmented bars.
-- **Detailed card** — the plan, when it was read, what each limit is worth, and recent usage from this Mac's records.
-- **Burn-rate forecast** — tells you when your pace will run out before the window does.
-- **In the menu bar** — the fullest ring as a figure, a small ring or split limits, with an optional dashboard.
+### System Tray & Shortcuts
+- **Live tray usage ring** — Renders the highest usage ring (or Pulse mark) directly in the Windows notification area.
+- **Left-click dashboard** — Left-click the tray icon to toggle a compact usage dashboard popup; right-click for quick panel toggle, manual refresh, startup toggle, Settings, and Quit.
+- **Global hotkey** — Press `Ctrl+Alt+P` (customizable) to show or hide the floating panel.
 
-<p align="center">
-  <img src="Docs/images/detailed-card.png" width="620" alt="The same Codex card, compact and detailed">
-</p>
+### Supported Providers (22 Built-in)
+- **Local auto-detection**: Claude Code, Codex, Cursor (pure-Go SQLite B-tree/WAL reader + Windows DPAPI Electron decryption), Antigravity (local Language Server PEB/loopback port discovery + `agy.exe` CLI fallback), Gemini CLI, Grok CLI.
+- **OAuth / API Key**: GitHub Copilot (RFC 8628 Device Flow), DeepSeek, Kimi Code, z.ai, Zhipu (GLM Coding Plan), MiniMax (`minimax.io` / `minimaxi.com`), OpenCode Go, Command Code, Volcengine (`arkcli`), Alibaba Coding Plan, Moonshot, OpenAI Platform, Kilo Code, sub2api, New API, Kiro.
 
-### Stays out of the way
-- **Any edge** — left, right, top, beside the Dock, or anywhere at all; it folds to a sliver when idle.
-- **Notifications you choose** — a limit crossing a line, spent, reset, failing checks, a low balance, a provider outage.
-- **Six languages** — English, Simplified and Traditional Chinese, Japanese, Korean and Russian.
-- **Optional extras** — global shortcuts, following the active display, hiding from screenshots.
-
-### Spend, status and the rest
-- **Token spend** — what 54 local clients have used, priced at public API rates, by day, model and agent, over any span you choose.
-- **Estimates in your currency** — dollars, yuan, Hong Kong or New Taiwan dollars, yen, won or roubles.
-- **Usage recaps** — shareable cards for a day, a week, a month or a year, built from the same records.
-- **Service status** — 44 providers' own status pages, and a notification when one reports an outage.
-- **Connection diagnostics** — where each figure came from, and the servers' own replies.
-- **For power users** — several accounts per provider, extensions for your own sources, `Pulse --json` for scripts.
-
-<p align="center">
-  <img src="Docs/images/spend.webp" height="290" alt="Token spend: total, tokens by kind, and the daily pattern">
-  &nbsp;&nbsp;
-  <img src="Docs/images/spend-history.webp" height="290" alt="Token spend day by day, by month and by agent">
-</p>
-
-**Everything in detail:** [Docs/features.md](Docs/features.md).
+### Privacy & CLI
+- Credentials are encrypted with **Windows DPAPI** in `%APPDATA%\Pulse\keys.dat`; settings live in `%APPDATA%\Pulse\settings.json`.
+- Run `Pulse.exe --json` to print the cached usage report as JSON for scripts and status bars.
 
 ---
 
-## Supported Providers & Data Routes
+## Build from Source (Windows)
 
-78 services, each read the way the product itself works — its own usage endpoint, the editor's login, a local language server, or a key you paste — and every percentage is the one the service reported. [The full list, and how each is read](Docs/supported-services.md).
+Requires **Go 1.24+** (verified on Go 1.27 `windows/amd64`; no C compiler or CGO needed):
 
----
-
-## Privacy & Security
-
-- **No Pulse account, no Pulse server** — your Mac talks to the services you use, under your own logins.
-- **Five kinds of connection, all listed** — those services, their public status pages, [models.dev](https://models.dev) for model prices, [ExchangeRate-API](https://www.exchangerate-api.com) only when you pick a currency other than the dollar, and GitHub/Sparkle for updates.
-- **Your keys stay on your Mac**, encrypted, and the usage records Pulse reads never leave it.
-
-[In detail](Docs/features.md#privacy-and-security).
-
----
-
-## Build from Source
-
-Pulse is built with native Swift and SwiftUI. Building the current sources needs the full **Xcode** (not the Command Line Tools), including the **macOS 26 SDK**; the app runs on **macOS 14+**.
-
-```bash
-# Clone the repository
-git clone https://github.com/qunqin24/Pulse.git
-cd Pulse
-
-# Build the app bundle
-./Scripts/bundle.sh
-
-# Launch it
-open build.noindex/Pulse.app
+```powershell
+git clone https://github.com/feicai922/Pulse-win.git
+cd Pulse-win\windows
+go test ./...
+.\build.ps1
 ```
 
-`swift run Pulse` is a quick way to build and run without a bundle, but notifications and in-app updates only work from the bundled app. See [Docs/build-from-source.md](Docs/build-from-source.md) for toolchain setup. Shipping a release: [Docs/releasing.md](Docs/releasing.md).
+`.\build.ps1` automatically runs:
+1. `cmd/genrsrc` to generate the multi-resolution `.ico` and PE `.syso` resource files (icon + Per-Monitor V2 DPI manifest) from `AppIcon/pulse-icon-1024.png`;
+2. `go build` to produce `Pulse.exe`;
+3. `go build -tags installer` to package `Pulse.exe` into `PulseSetup.exe`.
 
 ---
 
-## Contributing
+## Upstream & Attribution
 
-How the repo is documented, what must not regress, and how to update the right page: [CONTRIBUTING.md](CONTRIBUTING.md). Map of topic docs: [Docs/README.md](Docs/README.md).
-
----
-
-## Design Attribution
-
-Pulse was inspired by a UI concept shared by [**Vinz** (@hivinz_)](https://x.com/hivinz_/status/2092996055248126353) on X in August 2026. Pulse is an independent implementation with its own interactions, functionality, animations, and visual details. Vinz is not affiliated with or responsible for Pulse.
-
----
-
-## Contributors
-
-Thanks to everyone who has contributed to Pulse.
-
-<a href="https://github.com/qunqin24/Pulse/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=qunqin24/Pulse" alt="Pulse contributors" />
-</a>
-
----
-
-## Support Pulse
-
-<p align="center">
-  <sub>Pulse is free and open source, built in spare time.<br>If it saved you from a surprise rate limit, you can buy the author a coffee — every cup keeps the rings spinning.</sub>
-</p>
-
-<p align="center">
-  <a href="https://afdian.com/a/qunqin"><img src="https://img.shields.io/badge/Afdian-Buy_me_a_coffee-946CE6?style=for-the-badge" alt="Support Pulse on Afdian"></a>
-</p>
-
----
-
-## License
-
-Licensed under [Apache 2.0](LICENSE). Bundled third-party assets retain their respective licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
----
-
-## Star History
-
-<a href="https://star-history.com/#qunqin24/Pulse&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=qunqin24/Pulse&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=qunqin24/Pulse&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=qunqin24/Pulse&type=Date" />
-  </picture>
-</a>
+- Windows port based on [qunqin24/Pulse](https://github.com/qunqin24/Pulse) (original macOS Swift/SwiftUI sources are preserved under `Sources/`).
+- UI concept inspired by [**Vinz** (@hivinz_)](https://x.com/hivinz_/status/2092996055248126353).
+- Licensed under the [Apache 2.0 License](LICENSE). Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
