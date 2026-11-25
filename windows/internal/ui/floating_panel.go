@@ -79,6 +79,7 @@ type FloatingPanel struct {
 	targetPtr    float32
 	lastInsideAt time.Time
 	spinPhase    float64
+	spinUntil    map[model.ProviderID]time.Time
 	animRunning  bool
 	menuOpen     bool
 	cardRect     win32.RectF
@@ -99,6 +100,7 @@ func NewFloatingPanel(settings *model.AppSettings, st *store.UsageStore, onOpenS
 		openness:       1.0,
 		targetOpen:     1.0,
 		lastInsideAt:   time.Now(),
+		spinUntil:      map[model.ProviderID]time.Time{},
 	}
 	globalPanel = p
 	return p
@@ -496,33 +498,39 @@ func (p *FloatingPanel) render() {
 				}
 			}
 
-			// Main ring track & colored arc (matching panel.png)
+			// Main ring track & colored arc (matching UsageRingView.swift)
 			rx := slot.cx - ringDia/2
 			ry := slot.cy - ringDia/2
 			c.DrawEllipse(rx, ry, ringDia, ringDia, lineW, win32.RGBAlpha(pal.RingTrack, uint8(255*contentAlpha)))
 
-			isRef := snap.AnimatesActivity && p.store.IsRefreshing(slot.provider)
+			isRef := snap.AnimatesActivity && p.isProviderSpinning(slot.provider, now)
 			if fracPtr != nil {
 				used := *fracPtr
-				col := UsageColor(used, isSpent, snap.WarningThreshold, pal.IsLight, snap.RingColors[string(slot.provider)])
-				col = win32.RGBAlpha(col, uint8(255*contentAlpha))
+				baseCol := UsageColor(used, isSpent, snap.WarningThreshold, pal.IsLight, snap.RingColors[string(slot.provider)])
 				drawFrac := used
 				if snap.ShowsRemaining && !isSpent {
 					drawFrac = 1 - used
 				}
+				arcAlpha := contentAlpha
 				if isRef {
-					startDeg := float32(-90 + p.spinPhase*360)
-					c.DrawArc(rx, ry, ringDia, ringDia, startDeg, 90, lineW, win32.RGBAlpha(col, uint8(130*contentAlpha)), true)
-				} else if drawFrac > 0 {
+					// Quietened in place while a fresh reading is fetched (opacity 0.3), never replaced.
+					arcAlpha *= 0.30
+				}
+				if drawFrac > 0 {
 					sweep := float32(drawFrac * 360)
 					if sweep < 6 {
 						sweep = 6
 					}
-					c.DrawArc(rx, ry, ringDia, ringDia, -90, sweep, lineW, col, true)
+					c.DrawArc(rx, ry, ringDia, ringDia, -90, sweep, lineW, win32.RGBAlpha(baseCol, uint8(255*arcAlpha)), true)
+				}
+				if isRef {
+					// Short travelling refreshMark over the ring (sweep 0.16 = 57.6°, period 0.85s).
+					startDeg := float32(-90 + p.spinPhase*360)
+					c.DrawArc(rx, ry, ringDia, ringDia, startDeg, 57.6, lineW, win32.RGBAlpha(baseCol, uint8(255*contentAlpha)), true)
 				}
 			} else if isRef {
 				startDeg := float32(-90 + p.spinPhase*360)
-				c.DrawArc(rx, ry, ringDia, ringDia, startDeg, 75, lineW, win32.RGBAlpha(pal.TextSecondary, uint8(180*contentAlpha)), true)
+				c.DrawArc(rx, ry, ringDia, ringDia, startDeg, 57.6, lineW, win32.RGBAlpha(pal.TextSecondary, uint8(210*contentAlpha)), true)
 			}
 
 			// Optional second inner ring
@@ -861,8 +869,9 @@ func (p *FloatingPanel) onHoverTick() {
 	}
 
 	if snap.AnimatesActivity {
+		now := time.Now()
 		for _, sl := range p.slots {
-			if p.store.IsRefreshing(sl.provider) {
+			if p.isProviderSpinning(sl.provider, now) {
 				needAnim = true
 				break
 			}
@@ -871,6 +880,19 @@ func (p *FloatingPanel) onHoverTick() {
 	if needAnim {
 		p.startAnim()
 	}
+}
+
+func (p *FloatingPanel) isProviderSpinning(id model.ProviderID, now time.Time) bool {
+	if p.store.IsRefreshing(id) {
+		return true
+	}
+	if until, ok := p.spinUntil[id]; ok {
+		if now.Before(until) {
+			return true
+		}
+		delete(p.spinUntil, id)
+	}
+	return false
 }
 
 func (p *FloatingPanel) onAnimTick() {
@@ -911,18 +933,19 @@ func (p *FloatingPanel) onAnimTick() {
 		changed = true
 	}
 
-	// Spinner only if actively refreshing
+	// Spinner only if actively refreshing or within click spin feedback window
 	anyRef := false
 	if snap.AnimatesActivity {
+		now := time.Now()
 		for _, sl := range p.slots {
-			if p.store.IsRefreshing(sl.provider) {
+			if p.isProviderSpinning(sl.provider, now) {
 				anyRef = true
 				break
 			}
 		}
 	}
 	if anyRef {
-		p.spinPhase += 0.045
+		p.spinPhase += 0.019 // ~0.85s per revolution at 60fps, matching UsageRingView.refreshPeriod
 		if p.spinPhase >= 1 {
 			p.spinPhase -= 1
 		}
@@ -1103,6 +1126,7 @@ func (p *FloatingPanel) handleMouseUp(lx, ly int32) {
 	} else {
 		for _, sl := range p.slots {
 			if float32(lx) >= sl.x && float32(lx) <= sl.x+sl.w && float32(ly) >= sl.y && float32(ly) <= sl.y+sl.h {
+				p.spinUntil[sl.provider] = time.Now().Add(850 * time.Millisecond)
 				p.store.RefreshOne(sl.provider)
 				p.startAnim()
 				break
@@ -1141,6 +1165,11 @@ func (p *FloatingPanel) showContextMenu() {
 	cmd := win32.TrackPopupMenu(hMenu, win32.TPM_RETURNCMD, cx, cy, p.hwnd)
 	switch cmd {
 	case menuCmdRefreshAll:
+		now := time.Now().Add(850 * time.Millisecond)
+		for _, sl := range p.slots {
+			p.spinUntil[sl.provider] = now
+		}
+		p.startAnim()
 		p.store.TriggerRefreshAll()
 	case menuCmdToggleRem:
 		p.settings.Update(func(s *model.AppSettings) { s.ShowsRemaining = !s.ShowsRemaining })
