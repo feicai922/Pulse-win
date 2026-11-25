@@ -18,7 +18,7 @@ Pulse Windows 版是一个轻量、本地优先的 AI 编程额度监视器，�
   - 提供图形化安装向导 `PulseSetup.exe`（基于 Win32 + GDI+ 原生界面，内置完整应用图标）：支持自定义安装目录（默认 `%LOCALAPPDATA%\Programs\Pulse`）、创建桌面与开始菜单快捷方式、配置开机自启动，以及在 Windows「应用和功能」中一键卸载（`Pulse.exe --uninstall`）。
   - 也可直接独立运行免安装的 `Pulse.exe`。
 - **内置主流 AI 服务商（22 个）**：
-  - **本地自动读取**：Claude Code、Codex、Cursor（纯 Go 读取 `state.vscdb` + Windows DPAPI 解密）、Antigravity（自动探测本机 Language Server 端口与 CSRF Token）、Gemini CLI、Grok CLI。
+  - **本地自动读取**：Claude Code、Codex、Cursor（纯 Go 读取 `state.vscdb` + Windows DPAPI 解密）、Antigravity（自动探测本机 Language Server 端口与 `~/.gemini/*/daemon/*.json` / 进程 CSRF Token，并支持 `agy.exe` CLI 回退）、Gemini CLI、Grok CLI。
   - **OAuth / Key 配置**：GitHub Copilot（内置 GitHub Device Code 登录）、DeepSeek、Kimi Code、z.ai、Zhipu（GLM Coding Plan）、MiniMax（支持 `minimax.io` / `minimaxi.com`）、OpenCode Go、Command Code、Volcengine（`arkcli`）、Alibaba Coding Plan、Moonshot、OpenAI API、Kilo Code、sub2api、New API、Kiro。
   - 所有手动输入的 API Key 均通过 **Windows DPAPI** 加密保存在 `%APPDATA%\Pulse\keys.dat`。
 - **脚本支持**：

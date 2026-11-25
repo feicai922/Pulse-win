@@ -31,9 +31,105 @@ func fetchAntigravity(ctx context.Context) model.ProviderUsage {
 	return srv
 }
 
+type agyCandidate struct {
+	pid   uint32
+	ports []int
+	token string
+}
+
+type agyDaemonRecord struct {
+	PID       uint32 `json:"pid"`
+	HTTPPort  int    `json:"httpPort"`
+	HTTPSPort int    `json:"httpsPort"`
+	CSRFToken string `json:"csrfToken"`
+	modTime   time.Time
+}
+
+func loadAntigravityDaemonRecords() []agyDaemonRecord {
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return nil
+	}
+	pattern := filepath.Join(home, ".gemini", "*", "daemon", "*.json")
+	files, err := filepath.Glob(pattern)
+	if err != nil || len(files) == 0 {
+		return nil
+	}
+	var out []agyDaemonRecord
+	for _, f := range files {
+		info, err := os.Stat(f)
+		if err != nil || info.IsDir() || info.Size() > 64*1024 {
+			continue
+		}
+		raw, err := os.ReadFile(f)
+		if err != nil {
+			continue
+		}
+		var rec agyDaemonRecord
+		if json.Unmarshal(raw, &rec) != nil || rec.PID == 0 || rec.CSRFToken == "" {
+			continue
+		}
+		rec.modTime = info.ModTime()
+		out = append(out, rec)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].modTime.After(out[j].modTime)
+	})
+	return out
+}
+
 func fetchAntigravityLanguageServer(ctx context.Context) model.ProviderUsage {
 	procs := win32.FindAntigravityServers()
-	if len(procs) == 0 {
+	daemonRecs := loadAntigravityDaemonRecords()
+
+	daemonByPID := map[uint32][]agyDaemonRecord{}
+	for _, rec := range daemonRecs {
+		daemonByPID[rec.PID] = append(daemonByPID[rec.PID], rec)
+	}
+
+	var candidates []agyCandidate
+	seenCandidate := map[string]bool{}
+	addCandidate := func(pid uint32, ports []int, token string) {
+		if token == "" || len(ports) == 0 {
+			return
+		}
+		key := fmt.Sprintf("%d:%s", pid, token)
+		if seenCandidate[key] {
+			return
+		}
+		seenCandidate[key] = true
+		candidates = append(candidates, agyCandidate{pid: pid, ports: ports, token: token})
+	}
+
+	for _, p := range procs {
+		livePorts := win32.ListeningPortsForPID(p.PID)
+		if len(livePorts) == 0 {
+			continue
+		}
+		if tok := extractCSRFToken(p.CmdLine, p.Env); tok != "" {
+			addCandidate(p.PID, livePorts, tok)
+		}
+		// Antigravity 2.34+ on Windows clears ANTIGRAVITY_SERVER_CSRF_TOKEN from its PEB
+		// via SetEnvironmentVariableW after startup, but writes the live CSRF token and
+		// HTTPS port to ~/.gemini/<app>/daemon/*.json keyed by PID.
+		for _, rec := range daemonByPID[p.PID] {
+			ports := mergePreferredPort(rec.HTTPSPort, livePorts)
+			addCandidate(p.PID, ports, rec.CSRFToken)
+		}
+	}
+
+	// Also consider live daemon discovery records whose PID is currently listening,
+	// even if FindAntigravityServers() didn't match the executable path/cmdline.
+	for _, rec := range daemonRecs {
+		livePorts := win32.ListeningPortsForPID(rec.PID)
+		if len(livePorts) == 0 {
+			continue
+		}
+		ports := mergePreferredPort(rec.HTTPSPort, livePorts)
+		addCandidate(rec.PID, ports, rec.CSRFToken)
+	}
+
+	if len(candidates) == 0 {
 		return model.UnavailableUsage(model.ProviderAntigravity, model.ReasonAntigravityNotRunning)
 	}
 
@@ -41,17 +137,12 @@ func fetchAntigravityLanguageServer(ctx context.Context) model.ProviderUsage {
 	somethingAnswered := false
 	answeredEmpty := false
 
-	for _, p := range procs {
-		token := extractCSRFToken(p.CmdLine, p.Env)
-		if token == "" {
-			continue
-		}
-		ports := win32.ListeningPortsForPID(p.PID)
-		for _, port := range ports {
+	for _, cand := range candidates {
+		for _, port := range cand.ports {
 			url := fmt.Sprintf("https://127.0.0.1:%d/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary", port)
 			req, _ := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader([]byte("{}")))
 			req.Header.Set("Content-Type", "application/json")
-			req.Header.Set("x-codeium-csrf-token", token)
+			req.Header.Set("x-codeium-csrf-token", cand.token)
 			resp, err := client.Do(req)
 			if err != nil {
 				continue
@@ -77,7 +168,7 @@ func fetchAntigravityLanguageServer(ctx context.Context) model.ProviderUsage {
 				answeredEmpty = true
 				continue
 			}
-			plan := fetchAntigravityPlan(ctx, client, port, token)
+			plan := fetchAntigravityPlan(ctx, client, port, cand.token)
 			now := time.Now()
 			return model.ProviderUsage{
 				Provider:   model.ProviderAntigravity,
@@ -97,6 +188,26 @@ func fetchAntigravityLanguageServer(ctx context.Context) model.ProviderUsage {
 		return model.UnavailableUsage(model.ProviderAntigravity, model.ReasonAntigravityNotAnswering)
 	}
 	return model.UnavailableUsage(model.ProviderAntigravity, model.ReasonAntigravityNotRunning)
+}
+
+func mergePreferredPort(preferred int, live []int) []int {
+	if preferred <= 0 {
+		return live
+	}
+	hasPreferred := false
+	out := make([]int, 0, len(live))
+	for _, p := range live {
+		if p == preferred {
+			hasPreferred = true
+			out = append([]int{p}, out...)
+		} else {
+			out = append(out, p)
+		}
+	}
+	if !hasPreferred {
+		return live
+	}
+	return out
 }
 
 func locateAgyCLI() string {

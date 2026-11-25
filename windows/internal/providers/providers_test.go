@@ -134,6 +134,16 @@ func TestAgyVersionCheck(t *testing.T) {
 	}
 }
 
+func TestMergePreferredPort(t *testing.T) {
+	got := mergePreferredPort(64347, []int{58254, 64347, 64348})
+	if len(got) != 3 || got[0] != 64347 {
+		t.Fatalf("expected 64347 prioritized, got %v", got)
+	}
+	if got2 := mergePreferredPort(9999, []int{58254, 64347}); len(got2) != 2 || got2[0] != 58254 {
+		t.Fatalf("unexpected non-live preferred port inclusion: %v", got2)
+	}
+}
+
 func TestLiveAntigravityProbe(t *testing.T) {
 	procs := win32.FindAntigravityServers()
 	t.Logf("found %d antigravity language_server processes", len(procs))
