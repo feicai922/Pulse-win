@@ -2,6 +2,15 @@
 
 Pulse Windows 版是一个轻量、本地优先的 AI 编程额度监视器，使用原生 **Go + Win32 API + GDI+** 编写（无 Electron/Chromium 运行时开销，内存占用约 10–18 MB），支持屏幕边缘悬浮显示与系统托盘显示。
 
+<p align="center">
+  <img src="docs/images/panel.png" height="340" alt="屏幕边缘悬浮面板与详情卡">
+  &nbsp;&nbsp;
+  <img src="docs/images/tray-popup.png" height="340" alt="系统托盘快捷面板">
+</p>
+<p align="center">
+  <img src="docs/images/settings.png" width="720" alt="Pulse 设置窗口">
+</p>
+
 ## 核心功能
 
 - **屏幕边缘悬浮面板**：

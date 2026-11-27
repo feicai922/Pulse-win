@@ -24,6 +24,16 @@
   <sub><b>Windows 10 / 11 (x64)</b> · 原生 Go + Win32 + GDI+（无 Electron 开销）· <a href="README.md"><b>English</b></a> · <b>简体中文</b> · <a href="windows/README.md"><b>Windows 构建说明</b></a></sub>
 </p>
 
+<p align="center">
+  <img src="windows/docs/images/panel.png" height="360" alt="Pulse Windows 版屏幕边缘悬浮条与悬停详情卡片">
+  &nbsp;&nbsp;
+  <img src="windows/docs/images/tray-popup.png" height="360" alt="Pulse Windows 版系统托盘快捷面板">
+</p>
+
+<p align="center">
+  <img src="windows/docs/images/settings.png" width="760" alt="Pulse Windows 版深色原生设置界面">
+</p>
+
 ---
 
 - **轻量原生体验**——纯 Go（`CGO_ENABLED=0`）+ Win32 API + GDI+ 实现，无 Electron / Chromium 运行时，内存占用约 10–18 MB，完整支持 Per-Monitor V2 高分屏缩放。

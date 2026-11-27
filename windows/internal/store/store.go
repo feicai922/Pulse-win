@@ -106,6 +106,13 @@ func (s *UsageStore) Usage(id model.ProviderID) model.ProviderUsage {
 	return model.UnavailableUsage(id, model.ReasonLoading)
 }
 
+// SeedUsageForPreview injects synthetic preview data for offline screenshot generation.
+func (s *UsageStore) SeedUsageForPreview(u model.ProviderUsage) {
+	s.mu.Lock()
+	s.usages[u.Provider] = u
+	s.mu.Unlock()
+}
+
 func (s *UsageStore) IsRefreshing(id model.ProviderID) bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

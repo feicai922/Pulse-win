@@ -24,6 +24,16 @@
   <sub><b>Windows 10 / 11 (x64)</b> · Pure Go + Win32 + GDI+ (No Electron) · <b>English</b> · <a href="README.zh-CN.md"><b>简体中文</b></a> · <a href="windows/README.md"><b>Windows Dev Guide</b></a></sub>
 </p>
 
+<p align="center">
+  <img src="windows/docs/images/panel.png" height="360" alt="Pulse for Windows floating edge rail and detail card">
+  &nbsp;&nbsp;
+  <img src="windows/docs/images/tray-popup.png" height="360" alt="Pulse for Windows system tray dashboard popup">
+</p>
+
+<p align="center">
+  <img src="windows/docs/images/settings.png" width="760" alt="Pulse for Windows dark native settings window">
+</p>
+
 ---
 
 - **Native & ultra-lightweight** — Built with pure Go (`CGO_ENABLED=0`), Win32 APIs, and GDI+ instead of Electron or WebView runtimes (~10–18 MB RAM, crisp Per-Monitor V2 DPI scaling).

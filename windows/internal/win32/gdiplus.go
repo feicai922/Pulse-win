@@ -1,6 +1,7 @@
 package win32
 
 import (
+	"image"
 	"math"
 	"sync"
 	"unsafe"
@@ -207,6 +208,7 @@ type LayeredCanvas struct {
 	OldObj  uintptr
 	Bitmap  uintptr
 	Gfx     uintptr
+	Bits    *byte
 	brush   uintptr
 	pen     uintptr
 	penCap  bool
@@ -258,9 +260,37 @@ func NewLayeredCanvas(w, h int32) *LayeredCanvas {
 		OldObj:  oldObj,
 		Bitmap:  gdipBmp,
 		Gfx:     gfx,
+		Bits:    bits,
 		brush:   brush,
 		pen:     pen,
 	}
+}
+
+// ToNRGBA flushes GDI+ drawing and converts the 32bpp PARGB DIB buffer into a standard NRGBA image.
+func (c *LayeredCanvas) ToNRGBA() *image.NRGBA {
+	if c == nil || c.Bits == nil || c.Width <= 0 || c.Height <= 0 {
+		return image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	}
+	c.Flush()
+	w, h := int(c.Width), int(c.Height)
+	src := unsafe.Slice(c.Bits, w*h*4)
+	out := image.NewNRGBA(image.Rect(0, 0, w, h))
+	for i := 0; i < w*h; i++ {
+		b := src[i*4+0]
+		g := src[i*4+1]
+		r := src[i*4+2]
+		a := src[i*4+3]
+		if a > 0 && a < 255 {
+			r = uint8(min(255, int(r)*255/int(a)))
+			g = uint8(min(255, int(g)*255/int(a)))
+			b = uint8(min(255, int(b)*255/int(a)))
+		}
+		out.Pix[i*4+0] = r
+		out.Pix[i*4+1] = g
+		out.Pix[i*4+2] = b
+		out.Pix[i*4+3] = a
+	}
+	return out
 }
 
 func (c *LayeredCanvas) Close() {
