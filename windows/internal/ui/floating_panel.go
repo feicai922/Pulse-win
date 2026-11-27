@@ -654,21 +654,24 @@ func (p *FloatingPanel) drawDetailCard(c *win32.LayeredCanvas, snap model.AppSet
 	if !dock.IsHorizontal() {
 		if p.cardOpensRight {
 			bx = p.railX + p.railW + hGap + ptrW
+			p.cardRect = win32.RectF{X: bx - ptrW, Y: by, W: bodyW + ptrW, H: bodyH}
 		} else {
 			bx = p.railX - hGap - ptrW - bodyW
+			p.cardRect = win32.RectF{X: bx, Y: by, W: bodyW + ptrW, H: bodyH}
 		}
 		by = clampF(slot.cy-bodyH/2, 4*s, maxF(4*s, float32(p.winH)-bodyH-4*s))
 		ptrCenter = p.ptrCoord - by
-		p.cardRect = win32.RectF{X: bx - ptrW, Y: by, W: bodyW + ptrW, H: bodyH}
+		p.cardRect.Y = by
 	} else {
 		bx = clampF(slot.cx-bodyW/2, 4*s, maxF(4*s, float32(p.winW)-bodyW-4*s))
 		if p.cardOpensDown {
 			by = p.railY + p.railH + hGap + ptrW
+			p.cardRect = win32.RectF{X: bx, Y: by - ptrW, W: bodyW, H: bodyH + ptrW}
 		} else {
 			by = p.railY - hGap - ptrW - bodyH
+			p.cardRect = win32.RectF{X: bx, Y: by, W: bodyW, H: bodyH + ptrW}
 		}
 		ptrCenter = p.ptrCoord - bx
-		p.cardRect = win32.RectF{X: bx, Y: by - ptrW, W: bodyW, H: bodyH + ptrW}
 	}
 
 	bubblePath := BuildUsageBubblePath(dock, p.cardOpensRight, p.cardOpensDown, snap.UsesRoundEnds,

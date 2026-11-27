@@ -2,6 +2,14 @@ package model
 
 import "testing"
 
+func TestDefaultEnabledProviders(t *testing.T) {
+	s := DefaultSettings()
+	got := s.OrderedEnabled()
+	if len(got) != 2 || got[0] != ProviderCodex || got[1] != ProviderAntigravity {
+		t.Fatalf("expected default enabled [codex, antigravity], got %v", got)
+	}
+}
+
 func TestUpdateAndSetEnabledNoDeadlock(t *testing.T) {
 	s := DefaultSettings()
 	s.Update(func(cfg *AppSettings) {

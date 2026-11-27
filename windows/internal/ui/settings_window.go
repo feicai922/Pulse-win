@@ -67,8 +67,8 @@ func NewSettingsWindow(settings *model.AppSettings, keys *auth.KeyStore, st *sto
 		activePane: "appearance",
 		discovered: providers.DiscoverInstalled(),
 	}
-	if !settings.Snapshot().HasCompletedSetup {
-		w.activePane = "prov:claudeCode"
+	if !settings.Snapshot().HasCompletedSetup && len(settings.OrderedEnabled()) == 0 {
+		w.activePane = "prov:codex"
 	}
 	globalSettingsWin = w
 	return w
@@ -78,7 +78,7 @@ func (w *SettingsWindow) Open(focusProvider model.ProviderID) {
 	if focusProvider != "" {
 		w.activePane = "prov:" + string(focusProvider)
 	} else if !w.settings.Snapshot().HasCompletedSetup && len(w.settings.OrderedEnabled()) == 0 {
-		w.activePane = "prov:claudeCode"
+		w.activePane = "prov:codex"
 	}
 	if w.hwnd != 0 {
 		win32.ShowWindow(w.hwnd, win32.SW_RESTORE)

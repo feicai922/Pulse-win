@@ -74,6 +74,15 @@ func BuildDockBerthPath(dock model.PanelDock, usesRoundEnds bool, openness float
 		return win32.NewRoundRectPath(x, y, w, h, r)
 	}
 
+	pts := dockBerthPoints(dock, usesRoundEnds, openness, x, y, w, h, s)
+	path := win32.NewPath(true)
+	win32.PathStartFigure(path)
+	win32.PathAddLines(path, pts)
+	win32.PathCloseFigure(path)
+	return path
+}
+
+func dockBerthPoints(dock model.PanelDock, usesRoundEnds bool, openness float32, x, y, w, h, s float32) []win32.PointF {
 	// Canonical dimensions are computed facing RIGHT (width = across, height = along).
 	cw, ch := w, h
 	if dock == model.DockTop || dock == model.DockBottom {
@@ -139,7 +148,8 @@ func BuildDockBerthPath(dock model.PanelDock, usesRoundEnds bool, openness float
 		pts = append(pts, win32.PointF{X: 0, Y: ch - f}, win32.PointF{X: 0, Y: f})
 	}
 
-	// Transform canonical facing-right points into actual dock edge & position
+	// Transform canonical facing-right points into actual dock edge & position.
+	// Canonical p.X == cw is the flat side flush against the screen edge; p.X == 0 is the outer rounded body.
 	for i, p := range pts {
 		switch dock {
 		case model.DockRight:
@@ -147,17 +157,14 @@ func BuildDockBerthPath(dock model.PanelDock, usesRoundEnds bool, openness float
 		case model.DockLeft:
 			pts[i] = win32.PointF{X: x + cw - p.X, Y: y + p.Y}
 		case model.DockTop:
-			pts[i] = win32.PointF{X: x + p.Y, Y: y + p.X}
-		case model.DockBottom:
+			// Quarter turn anticlockwise: screen edge (p.X == cw) sits flush on y, body extends downward.
 			pts[i] = win32.PointF{X: x + p.Y, Y: y + cw - p.X}
+		case model.DockBottom:
+			// Quarter turn clockwise: screen edge (p.X == cw) sits flush on y + cw, body extends upward.
+			pts[i] = win32.PointF{X: x + p.Y, Y: y + p.X}
 		}
 	}
-
-	path := win32.NewPath(true)
-	win32.PathStartFigure(path)
-	win32.PathAddLines(path, pts)
-	win32.PathCloseFigure(path)
-	return path
+	return pts
 }
 
 func squircleCornerExp2(cx, cy, r, startX, startY, endX, endY float32) []win32.PointF {

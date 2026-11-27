@@ -41,3 +41,45 @@ func TestBuildPulsePaths(t *testing.T) {
 	}
 	win32.DeletePath(b)
 }
+
+func TestDockBerthTopAndBottomOrientation(t *testing.T) {
+	// DockTop: flat flared screen edge must touch y=0 across the full width,
+	// with rounded inner corners facing downward (toward y=64).
+	topPts := dockBerthPoints(model.DockTop, false, 1.0, 0, 0, 200, 64, 1.0)
+	topAt0, topAt200 := false, false
+	bodyNearBottom := false
+	for _, p := range topPts {
+		if p.Y == 0 && p.X == 0 {
+			topAt0 = true
+		}
+		if p.Y == 0 && p.X == 200 {
+			topAt200 = true
+		}
+		if p.Y > 63.5 && p.X > 20 && p.X < 180 {
+			bodyNearBottom = true
+		}
+	}
+	if !topAt0 || !topAt200 || !bodyNearBottom {
+		t.Fatalf("DockTop orientation wrong: topAt0=%v topAt200=%v bodyNearBottom=%v", topAt0, topAt200, bodyNearBottom)
+	}
+
+	// DockBottom: flat flared screen edge must touch y=64 across the full width,
+	// with rounded inner corners facing upward (toward y=0).
+	botPts := dockBerthPoints(model.DockBottom, false, 1.0, 0, 0, 200, 64, 1.0)
+	botAt0, botAt200 := false, false
+	bodyNearTop := false
+	for _, p := range botPts {
+		if p.Y == 64 && p.X == 0 {
+			botAt0 = true
+		}
+		if p.Y == 64 && p.X == 200 {
+			botAt200 = true
+		}
+		if p.Y < 0.5 && p.X > 20 && p.X < 180 {
+			bodyNearTop = true
+		}
+	}
+	if !botAt0 || !botAt200 || !bodyNearTop {
+		t.Fatalf("DockBottom orientation wrong: botAt0=%v botAt200=%v bodyNearTop=%v", botAt0, botAt200, bodyNearTop)
+	}
+}

@@ -150,7 +150,7 @@ func DefaultSettings() *AppSettings {
 	return &AppSettings{
 		mu:                  &sync.RWMutex{},
 		HasCompletedSetup:   false,
-		EnabledProviders:    []string{},
+		EnabledProviders:    []string{string(ProviderCodex), string(ProviderAntigravity)},
 		ProviderOrder:       defaultOrder(),
 		IsPanelVisible:      true,
 		Dock:                DockRight,
